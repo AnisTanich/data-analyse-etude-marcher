@@ -1,0 +1,34 @@
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa_new
+
+a executer une premiere fois
+ssh-copy-id u1@192.168.0.1
+ssh-copy-id u1@192.168.0.2
+ssh-copy-id u1@192.168.0.3
+ssh-copy-id u1@192.168.0.4
+ssh-copy-id u1@192.168.0.5
+ssh-copy-id u1@192.168.0.6
+
+ansible-playbook -i inventory test_playbook.yml --private-key=~/.ssh/id_rsa_new
+
+ansible-playbook -i  inventory deploy_hadoop.yml --check --ask-become-pass
+
+ansible-playbook -i  inventory deploy_hadoop.yml --ask-become-pass
+
+ 
+ne pas oublié 
+
+tous : 
+source ~/.bashrc
+sudo mkdir -p /usr/local/hadoop/logs
+sudo chown -R u1:u1 /usr/local/hadoop/logs
+
+namenode
+sudo hadoop-daemon.sh start journalnode
+
+zookeeper:
+sudo mkdir -p /usr/local/zookeeper/logs
+sudo chown -R u1:u1 /usr/local/zookeeper/logs
+zkServer.sh start
+
+
+

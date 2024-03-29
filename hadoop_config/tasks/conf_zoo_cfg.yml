@@ -1,0 +1,24 @@
+- name: Mettre à jour le fichier zoo.cfg avec dataDir et les serveurs Zookeeper
+  ansible.builtin.blockinfile:
+    path: "{{ zookeeper_config_dir }}/zoo.cfg"
+    block: |
+      dataDir=/home/u1/zookeeper
+      {% for host in groups['zookeeper'] %}
+      server.{{ loop.index0 }}={{ hostvars[host]['ansible_host'] }}:2888:3888
+      {% endfor %}
+    marker: "# {mark} ZOOKEEPER CONFIGURATION BLOCK"
+    state: present
+  when: configure_zookeeper | default(true)
+
+
+- name: Créer le fichier myid pour le serveur ZooKeeper
+  ansible.builtin.copy:
+    dest: "{{ zookeeper_data_dir }}/myid"
+    content: "{{ hostvars[inventory_hostname]['myid'] }}"
+    owner: "{{ zookeeper_user }}"
+    group: "{{ zookeeper_group }}"
+    mode: '0644'
+  when: configure_zookeeper | default(false)
+
+
+

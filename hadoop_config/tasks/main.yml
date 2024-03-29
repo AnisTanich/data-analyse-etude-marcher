@@ -1,0 +1,11 @@
+---
+# tasks file for hadoop_master
+
+- name: configurer fichier workers avec slaves
+  import_tasks: conf_workers.yml
+
+- name: telecharge et extrait zookeeper
+  import_tasks: dl_extract_zk.yml
+
+- name: configure zoo.cfg avec contenu de inventory
+  import_tasks: conf_zoo_cfg.yml

@@ -1,0 +1,18 @@
+[masters]
+master1 ansible_host=192.168.0.1 ansible_user=u1 myid=0 ansible_python_interpreter=/usr/bin/python3
+master2 ansible_host=192.168.0.2 ansible_user=u1 myid=1 ansible_python_interpreter=/usr/bin/python3
+
+
+[slaves]
+
+slave1 ansible_host=192.168.0.3 ansible_user=u1 myid=2 ansible_python_interpreter=/usr/bin/python3
+slave2 ansible_host=192.168.0.4 ansible_user=u1 ansible_python_interpreter=/usr/bin/python3
+slave3 ansible_host=192.168.0.5 ansible_user=u1 ansible_python_interpreter=/usr/bin/python3
+
+[edge]
+edge1 ansible_host=192.168.0.6 ansible_user=u1 ansible_python_interpreter=/usr/bin/python3
+
+[zookeeper]
+master1 ansible_host=192.168.0.1 ansible_user=u1 myid=0 ansible_python_interpreter=/usr/bin/python3
+master2 ansible_host=192.168.0.2 ansible_user=u1 myid=1 ansible_python_interpreter=/usr/bin/python3
+slave1 ansible_host=192.168.0.3 ansible_user=u1 myid=2 ansible_python_interpreter=/usr/bin/python3

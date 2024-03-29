@@ -1,0 +1,94 @@
+- hosts: masters
+  become: yes
+  vars:
+    hadoop_bin: "/usr/local/hadoop/bin"
+    hadoop_sbin: "/usr/local/hadoop/sbin"
+  tasks:
+    - name: Démarrer JournalNode sur tous les masters
+      ansible.builtin.shell:
+        cmd: "{{ hadoop_sbin }}/hadoop-daemon.sh start journalnode"
+
+- hosts: master1
+  become: yes
+  vars:
+    hadoop_bin: "/usr/local/hadoop/bin"
+    hadoop_sbin: "/usr/local/hadoop/sbin"
+  tasks:
+    - name: Vérifier si le NameNode a déjà été formaté
+      ansible.builtin.shell:
+        cmd: "{{ hadoop_bin }}/hdfs getconf -namenodes"
+      register: namenode_status
+      changed_when: false
+      failed_when: namenode_status.stdout == ""
+      check_mode: no
+
+    - name: Formater NameNode
+      ansible.builtin.shell:
+        cmd: "{{ hadoop_bin }}/hadoop namenode -format"
+      when: namenode_status.stdout == ""
+    
+    - name: Initialiser les Shared Edits
+      ansible.builtin.shell:
+        cmd: "{{ hadoop_bin }}/hdfs namenode -initializeSharedEdits -force"
+      when: namenode_status.stdout == ""
+
+    - name: Démarrer NameNode
+      ansible.builtin.shell:
+        cmd: "{{ hadoop_sbin }}/hadoop-daemon.sh start namenode"
+      when: inventory_hostname == "master1"
+
+
+- hosts: masters
+  become: yes
+  vars:
+    hadoop_bin: "/usr/local/hadoop/bin"
+    hadoop_sbin: "/usr/local/hadoop/sbin"
+  tasks:
+    - name: Bootstrap Standby NameNode et démarrer NameNode
+      ansible.builtin.shell:
+        cmd: "{{ hadoop_bin }}/hdfs namenode -bootstrapStandby"
+      when: inventory_hostname != "master1"
+
+    - name: démarrer NameNode
+      ansible.builtin.shell:
+        cmd: "{{ hadoop_sbin }}/hadoop-daemon.sh start namenode"
+      when: inventory_hostname != "master1"
+ 
+
+    - name: Vérifier l'état de ZooKeeper
+      ansible.builtin.shell:
+        cmd: "/usr/local/zookeeper/bin/zkServer.sh status"
+      register: zk_status
+      ignore_errors: true
+
+    - name: Démarrer ZooKeeper si non démarré
+      ansible.builtin.shell:
+        cmd: "/usr/local/zookeeper/bin/zkServer.sh start"
+      when: "'not running' in zk_status.stdout or zk_status.rc != 0"
+      become: yes
+
+
+- hosts: slaves
+  become: yes
+  vars:
+    hadoop_sbin: "/usr/local/hadoop/sbin"
+  tasks:
+    - name: Démarrer DataNode
+      ansible.builtin.shell:
+        cmd: "{{ hadoop_sbin }}/hadoop-daemon.sh start datanode"
+
+- hosts: masters
+  become: yes
+  vars:
+    hadoop_bin: "/usr/local/hadoop/bin"
+    hadoop_sbin: "/usr/local/hadoop/sbin"
+  tasks:
+    - name: Format ZKFC et répondre 'yes' automatiquement
+      ansible.builtin.shell:
+        cmd: "echo 'yes' | {{ hadoop_bin }}/hdfs zkfc -formatZK"
+
+    - name: Démarrer ZKFC sur les masters
+      ansible.builtin.shell:
+        cmd: "{{ hadoop_sbin }}/hadoop-daemon.sh start zkfc"
+
+

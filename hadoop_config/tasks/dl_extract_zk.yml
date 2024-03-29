@@ -1,0 +1,67 @@
+- name: Vérifier si Zookeeper est déjà installé
+  ansible.builtin.stat:
+    path: "{{ zookeeper_install_dir }}"
+  register: zookeeper_installed
+
+- name: Vérifier si Zookeeper est déjà téléchargé et à jour
+  ansible.builtin.stat:
+    path: "{{ zookeeper_download_dest }}"
+  register: zookeeper_file
+
+- name: Télécharger Zookeeper
+  ansible.builtin.get_url:
+    url: "{{ zookeeper_download_url }}"
+    dest: "{{ zookeeper_download_dest }}"
+    timeout: 60
+  when: not zookeeper_file.stat.exists and dl_extract_zk | default(true) and not zookeeper_installed.stat.exists
+  register: download_result
+
+- name: Vérifier si Zookeeper est déjà extrait
+  ansible.builtin.stat:
+    path: "/tmp/apache-zookeeper-{{ zookeeper_version }}-bin"
+  register: zookeeper_extracted
+
+- name: Extraire Zookeeper dans le répertoire temporaire
+  ansible.builtin.unarchive:
+    src: "{{ zookeeper_download_dest }}"
+    dest: "/tmp"
+    remote_src: yes
+  when: not zookeeper_extracted.stat.exists and dl_extract_zk | default(true) and not zookeeper_installed.stat.exists
+
+
+
+
+- name: Déplacer Zookeeper vers le répertoire d'installation et renommer
+  ansible.builtin.command:
+    cmd: mv /tmp/apache-zookeeper-{{ zookeeper_version }}-bin "{{ zookeeper_install_dir }}"
+    creates: "{{ zookeeper_install_dir }}/apache-zookeeper-{{ zookeeper_version }}-bin"
+  when: 
+    - dl_extract_zk | default(true)
+    - download_result.changed or not zookeeper_installed.stat.exists and not zookeeper_installed.stat.exists
+
+
+- name: Vérifier si zoo.cfg existe déjà
+  ansible.builtin.stat:
+    path: "{{ zookeeper_install_dir }}/conf/zoo.cfg"
+  register: zoo_cfg_exists
+
+- name: Copier zoo_sample.cfg vers zoo.cfg
+  ansible.builtin.copy:
+    src: "{{ zookeeper_install_dir }}/conf/zoo_sample.cfg"
+    dest: "{{ zookeeper_install_dir }}/conf/zoo.cfg"
+    remote_src: yes
+    force: yes
+  when: 
+    - dl_extract_zk | default(true)
+    - not zoo_cfg_exists.stat.exists
+
+
+- name: Créer le dossier zookeeper dans le dossier personnel de l'utilisateur
+  ansible.builtin.file:
+    path: "{{ zookeeper_data_dir }}"
+    state: directory
+    owner: "{{ zookeeper_user }}"
+    group: "{{ zookeeper_group }}"
+    mode: '0755'
+  when: dl_extract_zk | default(true)
+

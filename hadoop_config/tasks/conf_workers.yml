@@ -1,0 +1,9 @@
+- name: Ajouter les nœuds slaves au fichier workers
+  ansible.builtin.lineinfile:
+    path: "{{ hadoop_install_dir }}/etc/hadoop/workers"
+    line: "{{ item }}"
+    create: yes
+    state: present
+  loop: "{{ groups['slaves'] }}"
+  when: conf_workers | default(true)
+

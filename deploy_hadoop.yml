@@ -1,0 +1,29 @@
+---
+- name: Déployer Hadoop Common Configuration
+  hosts: all
+  become: yes
+  roles:
+    - role: hadoop_common
+      vars:
+        ssh_setup_enabled: true
+        update_hosts_enabled: true
+        dl_hadoop: false
+        modif_bashrc: true
+        conf_java_home: true
+        deploy_site: true
+
+- name: Configurer les nœuds Master Hadoop
+  hosts: zookeeper
+  become: yes
+  roles:
+    - role: hadoop_config
+      vars:
+        conf_workers: true
+        dl_extract_zk: false
+        configure_zookeeper: true
+
+
+      
+
+
+
