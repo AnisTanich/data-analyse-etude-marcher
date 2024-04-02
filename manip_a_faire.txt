@@ -23,12 +23,25 @@ sudo mkdir -p /usr/local/hadoop/logs
 sudo chown -R u1:u1 /usr/local/hadoop/logs
 
 namenode
-sudo hadoop-daemon.sh start journalnode
+hadoop-daemon.sh start journalnode
 
 zookeeper:
 sudo mkdir -p /usr/local/zookeeper/logs
 sudo chown -R u1:u1 /usr/local/zookeeper/logs
 zkServer.sh start
 
+datanode:
+hadoop-daemon.sh start datanode 
 
 
+SUITE A REDEMARAGE :
+1. SUR ZOOKEEPER :
+zkServer.sh start
+2. sur namenode 
+hadoop-daemon.sh start journalnode
+hadoop-daemon.sh start namenode
+hdfs namenode -bootstrapStandby #peu etre utile sur namenode secondaire avant le start mais pas tjr
+4. sur datanode
+hadoop-daemon.sh start datanode
+sur namenodes
+hadoop-daemon.sh start zkfc
