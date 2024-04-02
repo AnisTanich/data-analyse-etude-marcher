@@ -1,3 +1,5 @@
+A faire sur le edge ou sur la machine hote d'ansible pour rendre le ansible accesible partout
+
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa_new
 
 a executer une premiere fois
@@ -8,19 +10,24 @@ ssh-copy-id u1@192.168.0.4
 ssh-copy-id u1@192.168.0.5
 ssh-copy-id u1@192.168.0.6
 
-ansible-playbook -i inventory test_playbook.yml --private-key=~/.ssh/id_rsa_new
 
-ansible-playbook -i  inventory deploy_hadoop.yml --check --ask-become-pass
+
+ansible-playbook -i inventory test_playbook.yml --private-key=~/.ssh/id_rsa_new  # pour ajouter la clef a la "liste blanche" d'ansible
+
+ansible-playbook -i  inventory deploy_hadoop.yml --check --ask-become-pass #un check pour verifier que tout passe
 
 ansible-playbook -i  inventory deploy_hadoop.yml --ask-become-pass
 
  
-ne pas oublié 
-
+Changement a faire sur le git
 tous : 
 source ~/.bashrc
 sudo mkdir -p /usr/local/hadoop/logs
 sudo chown -R u1:u1 /usr/local/hadoop/logs
+
+
+
+a faire une fois le ansible lancé (a automatisé pour plus tard)
 
 namenode
 hadoop-daemon.sh start journalnode
