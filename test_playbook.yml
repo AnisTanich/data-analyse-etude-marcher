@@ -1,8 +1,0 @@
----
-- name: Test Connection and Gather OS Info
-  hosts: all
-  gather_facts: no
-  tasks:
-    - name: Execute uname -a on all hosts
-      command: uname -a
-      register: uname_output
